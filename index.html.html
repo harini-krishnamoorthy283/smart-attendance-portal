@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart Attendance Portal</title>
+<style>
+:root{--bg:#f1f3ee;--card:#fff;--tx:#14231f;--mut:#5f6f69;--bd:#d8ded9;--ac:#0f766e;--acx:#fff;--lo:#15803d;--me:#b45309;--hi:#b91c1c;--c0:#e4e9e5;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1714;--card:#14241f;--tx:#e6f0ed;--mut:#94aaa3;--bd:#243a34;--ac:#2dd4bf;--acx:#06201c;--lo:#4ade80;--me:#fbbf24;--hi:#f87171;--c0:#1e332d}}
+:root[data-theme="dark"]{--bg:#0d1714;--card:#14241f;--tx:#e6f0ed;--mut:#94aaa3;--bd:#243a34;--ac:#2dd4bf;--acx:#06201c;--lo:#4ade80;--me:#fbbf24;--hi:#f87171;--c0:#1e332d}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:960px;margin:auto;padding:16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--bd);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:3}
+.top b{font-size:17px}.sub{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:10px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.st b{display:block;font-size:26px;line-height:1.2}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.bd{font-size:13px;font-weight:600;padding:2px 10px;border-radius:99px;border:1.5px solid currentColor;white-space:nowrap}
+.Low,.ok{color:var(--lo)}.Medium{color:var(--me)}.High,.no{color:var(--hi)}
+h2{font-size:16px;margin:16px 0 8px}
+input{width:100%;font:inherit;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);margin:4px 0 10px}
+label{font-size:13px;color:var(--mut)}
+.btn{font:inherit;font-weight:600;border:0;background:var(--ac);color:var(--acx);padding:10px 16px;border-radius:8px;cursor:pointer}
+.btn.o{background:none;color:var(--ac);border:1.5px solid var(--ac);padding:6px 12px;font-size:13px}
+button:focus-visible,input:focus-visible,.pk:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.pk{cursor:pointer}.pk:hover{border-color:var(--ac)}
+.bars{display:flex;gap:8px;align-items:flex-end;height:110px;margin-top:8px}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:12px;color:var(--mut)}
+.bars i{width:100%;border-radius:4px 4px 0 0;background:var(--ac);display:block}
+.mk{display:grid;grid-template-columns:90px 1fr 32px;gap:8px;align-items:center;margin:6px 0;font-size:14px}
+.mk i{display:block;height:10px;border-radius:5px;background:var(--ac)}.mk span{background:var(--c0);border-radius:5px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--lo);margin-right:6px}
+.rb{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--c0);margin:8px 0}.rb i{display:block}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+#toast.on{opacity:1}
+.lg{max-width:380px;margin:8vh auto 0}
+</style></head><body><div id="app"></div><div id="toast" role="status"></div>
+<script>
+const S=[['Harini K K','2503811714822013',[4,5,4,5,5,4,5,5],[88,90,89]],['Arjun R','2503811714821014',[5,5,4,4,4,3,3,3],[72,75,74]],['Meera S','2503811714822015',[5,4,4,4,3,3,2,1],[55,60,60]],['Karthik V','2503811714821016',[4,4,5,4,5,4,5,4],[81,84,84]],['Divya P','2503811714822017',[5,5,5,4,5,5,5,5],[93,91,95]],['Naveen M','2503811714821018',[4,3,4,3,3,2,3,2],[62,58,66]],['Sana F','2503811714822019',[5,4,5,5,4,5,4,5],[85,80,87]],['Vikram T','2503811714821020',[3,4,3,3,2,3,2,2],[48,55,52]]].map(([n,r,w,m])=>({n,r,w,m}));
+const feed=[['2503811714822017','08:58:40','0.18'],['2503811714822013','09:02:11','0.21'],['2503811714821014','09:05:33','0.27'],['2503811714822019','09:10:02','0.15'],['2503811714821016','09:14:47','0.31']].map(([r,t,d])=>({r,t,d}));
+const $=id=>document.getElementById(id),by=r=>S.find(s=>s.r===r),at=r=>feed.find(f=>f.r===r);
+let U=null,pick=null;
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2400)}
+function feat(s){const w=s.w.map(x=>x/5),n=w.length,xm=(n-1)/2,ym=w.reduce((a,b)=>a+b)/n;let a=0,b=0;w.forEach((y,i)=>{a+=(i-xm)*(y-ym);b+=(i-xm)**2});return{pct:ym*100,trend:a/b}}
+function risk(s){const f=feat(s),[t,a,i]=s.m,sc=f.pct*.4+t*.2+a*.15+i*.15+f.trend*200,lvl=sc<50?'High':sc<70?'Medium':'Low';
+const c=[['low attendance ('+f.pct.toFixed(1)+'%)',75-f.pct],['declining trend ('+f.trend.toFixed(2)+'/week)',-f.trend*300],['low test marks ('+t+')',70-t],['low assignment marks ('+a+')',70-a],['low internal marks ('+i+')',70-i]].filter(x=>x[1]>0).sort((x,y)=>y[1]-x[1]).slice(0,2).map(x=>x[0]);
+return{...f,lvl,avg:(t+a+i)/3,why:c.length?c:['good attendance and marks']}}
+function login(){const id=$('u').value.trim(),pw=$('p').value;
+if(id==='teacher'&&pw==='demo')U={role:'t',name:'Dr. Anitha (Faculty)'};
+else{const s=by(id);if(s&&pw==='demo')U={role:'s',r:s.r,name:s.n};else{$('er').textContent='ID or password is wrong. Use a demo button below.';return}}
+pick=null;render()}
+function fill(u){$('u').value=u;$('p').value='demo'}
+function out(){U=null;pick=null;render()}
+function detail(s){const x=risk(s),f=at(s.r),M=[['Test',s.m[0]],['Assignment',s.m[1]],['Internal',s.m[2]]];
+return '<div class="g"><div class="card st"><b>'+x.pct.toFixed(1)+'%</b><span class="sub">Attendance</span></div><div class="card st"><b>'+x.avg.toFixed(1)+'</b><span class="sub">Average marks</span></div><div class="card st"><b class="'+x.lvl+'">'+x.lvl+'</b><span class="sub">Risk level</span></div><div class="card st"><b class="'+(f?'ok':'no')+'">'+(f?'Present':'Absent')+'</b><span class="sub">'+(f?'Marked at '+f.t:'Not marked today')+'</span></div></div>'+
+'<div class="card"><b>Days present per week</b><div class="bars">'+s.w.map((k,i)=>'<div>'+k+'<i style="height:'+k/5*80+'%"></i>W'+(i+1)+'</div>').join('')+'</div><p class="sub" style="margin:8px 0 0">Out of 5 days. Trend '+x.trend.toFixed(2)+' per week.</p></div>'+
+'<div class="card"><b>Marks</b>'+M.map(m=>'<div class="mk"><span class="sub">'+m[0]+'</span><span><i style="width:'+m[1]+'%"></i></span><b>'+m[1]+'</b></div>').join('')+'</div>'+
+'<div class="card"><b>Why this risk level</b><p style="margin:6px 0 0">'+x.why.join(', ')+'</p></div>'}
+function teacher(){const R=S.map(risk),c={Low:0,Medium:0,High:0},col={Low:'var(--lo)',Medium:'var(--me)',High:'var(--hi)'};R.forEach(x=>c[x.lvl]++);
+const avg=R.reduce((a,x)=>a+x.pct,0)/S.length;
+if(pick){const s=by(pick);return '<button class="btn o" onclick="pick=null;render()">Back to class</button><h2>'+s.n+' <span class="sub">'+s.r+'</span></h2>'+detail(s)}
+return '<div class="g"><div class="card st"><b>'+S.length+'</b><span class="sub">Students</span></div><div class="card st"><b>'+feed.length+'</b><span class="sub">Present today</span></div><div class="card st"><b>'+avg.toFixed(1)+'%</b><span class="sub">Average attendance</span></div><div class="card st"><b class="High">'+c.High+'</b><span class="sub">High-risk students</span></div></div>'+
+'<div class="card"><div class="row"><div><b><span class="dot"></span>IoT-CAM-01, Room 204</b><div class="sub">Online. Sends each match to the server over HTTPS.</div></div><button class="btn o" onclick="sim()">Simulate a scan</button></div></div>'+
+'<div class="card"><b>Risk levels</b><div class="rb">'+['Low','Medium','High'].map(k=>'<i style="width:'+c[k]/S.length*100+'%;background:'+col[k]+'"></i>').join('')+'</div><span class="sub">Low '+c.Low+'. Medium '+c.Medium+'. High '+c.High+'.</span></div>'+
+'<h2>Live check-ins</h2>'+(feed.length?[...feed].reverse().map(f=>'<div class="card row"><span>'+by(f.r).n+' <span class="sub">'+f.r.slice(-5)+'</span></span><span class="sub">'+f.t+', distance '+f.d+'</span></div>').join(''):'<div class="card sub">No check-ins yet today.</div>')+
+'<h2>All students</h2>'+S.map((s,k)=>'<div class="card pk row" tabindex="0" onclick="pick=\''+s.r+'\';render()" onkeydown="if(event.key===\'Enter\'){pick=\''+s.r+'\';render()}"><div><div><b>'+s.n+'</b> <span class="sub">'+s.r+'</span></div><div class="sub">'+R[k].pct.toFixed(1)+'% attendance, '+R[k].avg.toFixed(1)+' avg marks, '+(at(s.r)?'present today':'absent today')+'</div></div><span class="bd '+R[k].lvl+'">'+R[k].lvl+'</span></div>').join('')}
+function sim(){const a=S.filter(s=>!at(s.r));if(!a.length){toast('Everyone is already marked present.');return}
+const s=a[Math.floor(Math.random()*a.length)],d=new Date();feed.push({r:s.r,t:d.toTimeString().slice(0,8),d:(.12+Math.random()*.25).toFixed(2)});toast('IoT-CAM-01 marked '+s.n+' present');render()}
+function render(){const A=$('app');
+if(!U){A.innerHTML='<div class="w"><div class="card lg"><h1 style="font-size:20px;margin:0 0 4px">Smart Attendance Portal</h1><p class="sub" style="margin:0 0 14px">Sign in to see attendance and performance.</p><label for="u">Register number or teacher ID</label><input id="u" autocomplete="username"><label for="p">Password</label><input id="p" type="password" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')login()"><p id="er" class="no" style="margin:0 0 8px;font-size:13px"></p><button class="btn" onclick="login()">Sign in</button><p class="sub" style="margin-top:16px">Sample data. Demo password is <b>demo</b>.</p><div class="row" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn o" onclick="fill(\'teacher\')">Fill teacher</button><button class="btn o" onclick="fill(\'2503811714822015\')">Fill student</button></div></div></div>';return}
+A.innerHTML='<div class="top"><div><b>Smart Attendance Portal</b><div class="sub">'+U.name+(U.role==='t'?', all students':', your records only')+'</div></div><button class="btn o" onclick="out()">Sign out</button></div><div class="w">'+(U.role==='t'?teacher():'<h2 style="margin-top:4px">Hello, '+U.name+'</h2>'+detail(by(U.r)))+'</div>';scrollTo(0,0)}
+render();
+</script></body></html>
